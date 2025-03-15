@@ -27,13 +27,6 @@ namespace Company.Api.ApplicationServices
         public async Task<ResponseBuilder<List<CompanyResponse>>> RetrieveAllCompanies()
         {
             var companies = (await retrieveCompanyDomainService.RetrieveAllCompanies()).ToList();
-
-            if (companies.Count == 0)
-            {
-                return new ResponseBuilder<List<CompanyResponse>>()
-                    .WithError("No companies available.", HttpStatusCode.NotFound);
-            }
-
             return new ResponseBuilder<List<CompanyResponse>>().WithSuccess(companies, HttpStatusCode.OK);
         }
 
@@ -50,7 +43,7 @@ namespace Company.Api.ApplicationServices
             {
                 logger.LogWarning("Company with ID {Id} not found.", id);
                 return new ResponseBuilder<CompanyResponse?>()
-                    .WithError($"Company with ID {id} was not found.", HttpStatusCode.NotFound);
+                    .WithError($"Company not found.", HttpStatusCode.NotFound);
             }
 
             return new ResponseBuilder<CompanyResponse?>().WithSuccess(company, HttpStatusCode.OK);

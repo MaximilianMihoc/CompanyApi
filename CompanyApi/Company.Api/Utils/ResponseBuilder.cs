@@ -5,40 +5,44 @@ namespace Company.Api.Utils
 {
     public class ResponseBuilder<T>
     {
-        private bool _success;
-        private T? _data;
-        private string? _message;
-        private HttpStatusCode _statusCode;
+        private bool success;
+        private T? data;
+        private string? message;
+        private HttpStatusCode statusCode;
+
+        public T? Data => data;
+        public bool IsSuccess => success;
+        public string? Message => message;
 
         public ResponseBuilder<T> WithSuccess(T data, HttpStatusCode statusCode = HttpStatusCode.OK)
         {
-            _success = true;
-            _data = data;
-            _statusCode = statusCode;
+            success = true;
+            this.data = data;
+            this.statusCode = statusCode;
             return this;
         }
 
         public ResponseBuilder<T> WithError(string message, HttpStatusCode statusCode = HttpStatusCode.NotFound)
         {
-            _success = false;
-            _message = message;
-            _statusCode = statusCode;
+            success = false;
+            this.message = message;
+            this.statusCode = statusCode;
             return this;
         }
 
         public IActionResult Build(ControllerBase controller, string actionName, ILogger logger)
         {
-            if (_success)
+            if (success)
             {
-                logger.LogInformation("Action {Action} returned success with status {StatusCode}", actionName, _statusCode);
-                return controller.StatusCode((int)_statusCode, _data);
+                logger.LogInformation("Action {Action} returned success with status {StatusCode}", actionName, statusCode);
+                return controller.StatusCode((int)statusCode, data);
             }
             else
             {
-                var errorResponse = new ErrorResponse(_message ?? "An error occurred", (int)_statusCode);
+                var errorResponse = new ErrorResponse(message ?? "An error occurred", (int)statusCode);
 
-                logger.LogWarning("Action {Action} failed with status {StatusCode}: {Message}", actionName, _statusCode, _message);
-                return controller.StatusCode((int)_statusCode, errorResponse);
+                logger.LogWarning("Action {Action} failed with status {StatusCode}: {Message}", actionName, statusCode, message);
+                return controller.StatusCode((int)statusCode, errorResponse);
             }
         }
     }
