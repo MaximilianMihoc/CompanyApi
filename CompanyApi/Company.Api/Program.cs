@@ -1,14 +1,52 @@
+using Company.Api.ApplicationServices;
+using Company.Api.DomainServices;
+using Company.Api.Utils;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Company API",
+        Version = "v1",
+        Description = "An API to manage companies with JWT authentication.",
+    });
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter 'Bearer' followed by a space and your token. Example: Bearer abc123"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new List<string>()
+        }
+    });
+});
+
+// build DI registrations
+builder.Services.AddScoped<IRetrieveCompanyApplicationService, RetrieveCompanyApplicationService>();
+builder.Services.AddScoped<IRetrieveCompanyDomainService, RetrieveCompanyDomainService>();
 
 
 builder.Services.AddProblemDetails(options =>
@@ -32,7 +70,8 @@ if (app.Environment.IsDevelopment())
         options
             .WithTitle("Company API")
             .WithTheme(ScalarTheme.Saturn)
-            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient);
+            .WithDefaultHttpClient(ScalarTarget.CSharp, ScalarClient.HttpClient)
+            .WithHttpBearerAuthentication(new HttpBearerOptions());
     });
     app.MapOpenApi();
 
@@ -42,8 +81,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<RequestLoggingMiddleware>();
+
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();

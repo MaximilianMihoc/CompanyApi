@@ -1,4 +1,6 @@
-﻿using Company.Api.Models;
+﻿using Company.Api.ApplicationServices;
+using Company.Api.Models;
+using Company.Api.Utils;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Company.Api.Controllers
@@ -7,33 +9,35 @@ namespace Company.Api.Controllers
     [ApiController]
     public class CompanyController : ControllerBase
     {
-        [HttpGet]
-        public async Task<ActionResult<List<CompanyResponse>>> GetCars()
-        {
-            //var cars = await retrieveCarApplicationService.RetrieveAllCars();
-            var cars = new List<CompanyResponse>
-            {
-                new CompanyResponse
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Company 1",
-                    Exchange = "Exchange 1",
-                    Ticker = "Ticker 1",
-                    Isin = "Isin 1",
-                    Website = "Website 1"
-                },
-                new CompanyResponse
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Company 2",
-                    Exchange = "Exchange 2",
-                    Ticker = "Ticker 2",
-                    Isin = "Isin 2",
-                    Website = "Website 2"
-                }
-            };
+        private readonly IRetrieveCompanyApplicationService retrieveCompanyApplicationService;
+        private readonly ILogger<CompanyController> logger;
 
-            return Ok(cars);
+        public CompanyController(
+            IRetrieveCompanyApplicationService retrieveCompanyApplicationService,
+            ILogger<CompanyController> logger)
+        {
+            this.retrieveCompanyApplicationService = retrieveCompanyApplicationService;
+            this.logger = logger;
+        }
+
+        [HttpGet]
+        [ProducesResponseType(typeof(List<CompanyResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> RetrieveAllCompanies()
+        {
+            var responseBuilder = await retrieveCompanyApplicationService.RetrieveAllCompanies();
+            return responseBuilder.Build(this, nameof(RetrieveAllCompanies), logger);
+        }
+
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(CompanyResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> RetrieveCompanyById(Guid id)
+        {
+            var responseBuilder = await retrieveCompanyApplicationService.RetrieveCompanyById(id);
+            return responseBuilder.Build(this, nameof(RetrieveCompanyById), logger);
         }
     }
 }
