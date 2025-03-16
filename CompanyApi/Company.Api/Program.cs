@@ -1,6 +1,8 @@
 using Company.Api.ApplicationServices;
 using Company.Api.Data;
 using Company.Api.DomainServices;
+using Company.Api.Projections;
+using Company.Api.Queries;
 using Company.Api.Utils;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
@@ -49,6 +51,9 @@ builder.Services.AddSwaggerGen(options =>
 // build DI registrations
 builder.Services.AddScoped<IRetrieveCompanyApplicationService, RetrieveCompanyApplicationService>();
 builder.Services.AddScoped<IRetrieveCompanyDomainService, RetrieveCompanyDomainService>();
+builder.Services.AddScoped<ICompanyQuery, CompanyQuery>();
+builder.Services.AddScoped<ICompanyProjection, CompanyProjection>();
+
 
 
 builder.Services.AddDbContext<CompanyDbContext>(options =>

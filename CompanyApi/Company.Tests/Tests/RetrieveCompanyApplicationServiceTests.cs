@@ -82,12 +82,6 @@ namespace Company.Tests.Tests
         [Fact]
         public async Task RetrieveCompanyById_WhenNoCompaniesExists_ReturnsFailure()
         {
-            // Arrange
-            var companyA = new CompanyResponseBuilder().WithName("Company A").Build();
-            mockCompanyDomainService
-                .Setup(x => x.RetrieveCompanyById(It.IsAny<Guid>()))
-                .ReturnsAsync(companyA);
-
             // Act
             var companiesResponse = await sut.RetrieveCompanyById(Guid.NewGuid());
 
@@ -124,5 +118,48 @@ namespace Company.Tests.Tests
             Assert.Equal("Company A", company.Name);
             Assert.Equal("Isin", company.Isin);
         }
+
+        [Fact]
+        public async Task RetrieveCompanyByIsin_WhenNoCompaniesExists_ReturnsFailure()
+        {
+            // Act
+            var companiesResponse = await sut.RetrieveCompanyByIsin("AB123");
+
+            // Assert
+            Assert.False(companiesResponse.IsSuccess);
+            Assert.NotNull(companiesResponse);
+            Assert.Null(companiesResponse.Data);
+            Assert.Equal("Company not found.", companiesResponse.Message);
+        }
+
+        [Fact]
+        public async Task RetrieveCompanyByIsin_WhenCompanyExists_ReturnsCompany()
+        {
+            // Arrange
+            var isin = "US0378331005";
+            var companyA = new CompanyResponseBuilder()
+                .WithName("Apple Inc.")
+                .WithTicker("AAPL")
+                .WithIsin(isin)
+                .Build();
+
+            mockCompanyDomainService
+                .Setup(x => x.RetrieveCompanybyIsin(It.IsAny<string>()))
+                .ReturnsAsync(companyA);
+
+            // Act
+            var companiesResponse = await sut.RetrieveCompanyByIsin(isin);
+
+            // Assert
+            Assert.True(companiesResponse.IsSuccess);
+            Assert.NotNull(companiesResponse);
+            Assert.NotNull(companiesResponse.Data);
+
+            var company = companiesResponse.Data;
+            Assert.Equal("Apple Inc.", company.Name);
+            Assert.Equal("AAPL", company.Ticker);
+            Assert.Equal(isin, company.Isin);
+        }
+
     }
 }

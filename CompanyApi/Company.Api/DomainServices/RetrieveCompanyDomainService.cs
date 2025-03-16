@@ -1,4 +1,6 @@
 ﻿using Company.Api.Models;
+using Company.Api.Projections;
+using Company.Api.Queries;
 
 namespace Company.Api.DomainServices
 {
@@ -11,19 +13,30 @@ namespace Company.Api.DomainServices
 
     public class RetrieveCompanyDomainService : IRetrieveCompanyDomainService
     {
-        public Task<IEnumerable<CompanyResponse>> RetrieveAllCompanies()
+        private readonly ICompanyQuery companyQuery;
+        private readonly ICompanyProjection companyProjection;
+
+        public RetrieveCompanyDomainService(
+            ICompanyQuery companyQuery,
+            ICompanyProjection companyProjection)
         {
-            throw new NotImplementedException();
+            this.companyQuery = companyQuery;
+            this.companyProjection = companyProjection;
         }
 
-        public Task<CompanyResponse?> RetrieveCompanyById(Guid id)
+        public async Task<IEnumerable<CompanyResponse>> RetrieveAllCompanies()
         {
-            throw new NotImplementedException();
+            return await companyQuery.GetAllCompanies(companyProjection);
         }
 
-        public Task<CompanyResponse?> RetrieveCompanybyIsin(string isin)
+        public async Task<CompanyResponse?> RetrieveCompanyById(Guid id)
         {
-            throw new NotImplementedException();
+            return await companyQuery.GetCompanyById(id, companyProjection);
+        }
+
+        public async Task<CompanyResponse?> RetrieveCompanybyIsin(string isin)
+        {
+            return await companyQuery.GetCompanyByIsin(isin, companyProjection);
         }
     }
 }
