@@ -34,7 +34,7 @@ namespace Company.Tests.Tests
 
             mockCompanyDomainFactory
                 .Setup(x => x.BuildCompanyDomain(companySubmission))
-                .Returns(domainResult);
+                .ReturnsAsync(domainResult);
 
             // Act
             var response = await sut.CreateCompany(companySubmission);
@@ -53,14 +53,52 @@ namespace Company.Tests.Tests
             var domainResult = Result<CompanyDomain>.Success(companyDomain);
             mockCompanyDomainFactory
                 .Setup(x => x.BuildCompanyDomain(companySubmission))
-                .Returns(domainResult);
+                .ReturnsAsync(domainResult);
 
             // Act
             var response = await sut.CreateCompany(companySubmission);
 
             // Assert
             Assert.True(response.IsSuccess);
-            Assert.Equal(companyDomain.Id, response.Data);
+            Assert.NotNull(response.Data);
+            Assert.Equal(companyDomain.Id, response.Data.Id);
+        }
+
+        [Fact]
+        public async Task UpdateCompany_WhenCompanySubmissionIsInvalid_ReturnsBadRequest()
+        {
+            // Arrange
+            var companySubmission = new CompanySubmissionBuilder().Build();
+            var domainResult = Result<CompanyDomain>.Failure("Company submission cannot be null.");
+
+            mockCompanyDomainFactory
+                .Setup(x => x.BuildCompanyDomainForUpdate(companySubmission))
+                .ReturnsAsync(domainResult);
+
+            // Act
+            var response = await sut.UpdateCompany(companySubmission);
+
+            // Assert
+            Assert.False(response.IsSuccess);
+            Assert.Equal("Company submission cannot be null.", response.Message);
+        }
+
+        [Fact]
+        public async Task UpdateCompany_WhenCompanySubmissionIsValid_ReturnsCreated()
+        {
+            // Arrange
+            var companySubmission = new CompanySubmissionBuilder().Build();
+            var companyDomain = new CompanyDomainBuilder().Build();
+            var domainResult = Result<CompanyDomain>.Success(companyDomain);
+            mockCompanyDomainFactory
+                .Setup(x => x.BuildCompanyDomainForUpdate(companySubmission))
+                .ReturnsAsync(domainResult);
+
+            // Act
+            var response = await sut.UpdateCompany(companySubmission);
+
+            // Assert
+            Assert.True(response.IsSuccess);
         }
     }
 }

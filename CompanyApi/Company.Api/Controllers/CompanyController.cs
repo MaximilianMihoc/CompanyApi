@@ -54,12 +54,22 @@ namespace Company.Api.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(CreatedResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> AddCompany(CompanySubmission company)
         {
             var responseBuilder = await saveCompanyApplicationService.CreateCompany(company);
             return responseBuilder.Build(this, nameof(AddCompany), logger);
+        }
+
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> UpdateCompany(Guid id, CompanySubmission company)
+        {
+            company.Id = id;
+            var responseBuilder = await saveCompanyApplicationService.UpdateCompany(company);
+            return responseBuilder.Build(this, nameof(UpdateCompany), logger);
         }
     }
 }

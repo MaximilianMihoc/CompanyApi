@@ -53,6 +53,7 @@ namespace Company.Tests.Data.Builders.Models
             {
                 Id = id,
                 Name = name,
+                ExchangeId = Guid.NewGuid(),
                 Exchange = exchange,
                 Ticker = ticker,
                 Isin = isin,

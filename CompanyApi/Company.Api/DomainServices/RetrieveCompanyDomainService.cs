@@ -9,6 +9,7 @@ namespace Company.Api.DomainServices
         Task<IEnumerable<CompanyResponse>> RetrieveAllCompanies();
         Task<CompanyResponse?> RetrieveCompanyById(Guid id);
         Task<CompanyResponse?> RetrieveCompanybyIsin(string isin);
+        Task<bool> IsIsinUsed(string isin, Guid? excludeCompanyId = null);
     }
 
     public class RetrieveCompanyDomainService : IRetrieveCompanyDomainService
@@ -22,6 +23,11 @@ namespace Company.Api.DomainServices
         {
             this.companyQuery = companyQuery;
             this.companyProjection = companyProjection;
+        }
+
+        public async Task<bool> IsIsinUsed(string isin, Guid? excludeCompanyId = null)
+        {
+            return await companyQuery.IsIsinUsed(isin, excludeCompanyId);
         }
 
         public async Task<IEnumerable<CompanyResponse>> RetrieveAllCompanies()

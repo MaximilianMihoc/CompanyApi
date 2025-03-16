@@ -17,6 +17,7 @@ namespace Company.Api.Projections
             {
                 Id = company.Id,
                 Name = company.Name,
+                ExchangeId = company.ExchangeId,
                 Exchange = company.Exchange.Name,
                 Ticker = company.Ticker,
                 Isin = company.Isin,

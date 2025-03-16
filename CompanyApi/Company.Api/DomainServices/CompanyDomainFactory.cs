@@ -6,7 +6,8 @@ namespace Company.Api.DomainServices
 {
     public interface ICompanyDomainFactory
     {
-        Result<CompanyDomain> BuildCompanyDomain(CompanySubmission company);
+        Task<Result<CompanyDomain>> BuildCompanyDomain(CompanySubmission company);
+        Task<Result<CompanyDomain>> BuildCompanyDomainForUpdate(CompanySubmission company);
     }
 
     public class CompanyDomainFactory : ICompanyDomainFactory
@@ -18,7 +19,7 @@ namespace Company.Api.DomainServices
             this.retrieveCompanyDomainService = retrieveCompanyDomainService;
         }
 
-        public Result<CompanyDomain> BuildCompanyDomain(CompanySubmission company)
+        public async Task<Result<CompanyDomain>> BuildCompanyDomain(CompanySubmission company)
         {
             if (company == null)
                 return Result<CompanyDomain>.Failure("Company submission cannot be null.");
@@ -26,11 +27,33 @@ namespace Company.Api.DomainServices
             if(!IsValidIsin(company.Isin))
                 return Result<CompanyDomain>.Failure("Invalid ISIN format.");
 
-            var existingCar = retrieveCompanyDomainService.RetrieveCompanybyIsin(company.Isin).Result;
-            if (existingCar is not null)
+            var isIsinUsed = await retrieveCompanyDomainService.IsIsinUsed(company.Isin);
+            if (isIsinUsed)
                 return Result<CompanyDomain>.Failure($"A company with ISIN {company.Isin} already exists.");
 
             var companyDomain = CompanyDomain.Create(Guid.NewGuid(), company.Name, company.ExchangeId, company.Ticker, company.Isin, company.Website);
+            return Result<CompanyDomain>.Success(companyDomain);
+        }
+
+        public async Task<Result<CompanyDomain>> BuildCompanyDomainForUpdate(CompanySubmission company)
+        {
+            if (company == null)
+                return Result<CompanyDomain>.Failure("Company submission cannot be null.");
+
+            var existingCompany = retrieveCompanyDomainService.RetrieveCompanyById(company.Id).Result;
+            if (existingCompany is null)
+                return Result<CompanyDomain>.Failure($"A company with Id {company.Id} does not exist.");
+
+            if (existingCompany.Isin != company.Isin && !IsValidIsin(company.Isin))
+                return Result<CompanyDomain>.Failure("Invalid ISIN format.");
+
+            if (existingCompany.Isin != company.Isin)
+            { 
+                var isIsinUsed = await retrieveCompanyDomainService.IsIsinUsed(company.Isin, existingCompany.Id);
+                if (isIsinUsed)
+                    return Result<CompanyDomain>.Failure($"A company with ISIN {company.Isin} already exists.");
+            }
+            var companyDomain = CompanyDomain.Create(existingCompany.Id, company.Name, company.ExchangeId, company.Ticker, company.Isin, company.Website);
             return Result<CompanyDomain>.Success(companyDomain);
         }
 

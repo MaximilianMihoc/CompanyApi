@@ -10,6 +10,7 @@ namespace Company.Api.Queries
         Task<IEnumerable<CompanyResponse>> GetAllCompanies(ICompanyProjection projection);
         Task<CompanyResponse?> GetCompanyById(Guid id, ICompanyProjection projection);
         Task<CompanyResponse?> GetCompanyByIsin(string isin, ICompanyProjection projection);
+        Task<bool> IsIsinUsed(string isin, Guid? excludeCompanyId = null);
     }
 
     public class CompanyQuery : ICompanyQuery
@@ -42,6 +43,14 @@ namespace Company.Api.Queries
                 .Where(company => company.Isin == isin)
                 .Select(projection.Project())
                 .FirstOrDefaultAsync();
+        }
+
+        public async Task<bool> IsIsinUsed(string isin, Guid? excludeCompanyId = null)
+        {
+            return await dbContext.Companies
+                .Where(company => company.Isin == isin)
+                .Where(company => !excludeCompanyId.HasValue || company.Id != excludeCompanyId.Value)
+                .AnyAsync();
         }
     }
 }
