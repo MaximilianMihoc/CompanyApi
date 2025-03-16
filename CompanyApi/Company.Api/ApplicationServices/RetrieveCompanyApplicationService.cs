@@ -9,6 +9,7 @@ namespace Company.Api.ApplicationServices
     {
         Task<ResponseBuilder<List<CompanyResponse>>> RetrieveAllCompanies();
         Task<ResponseBuilder<CompanyResponse?>> RetrieveCompanyById(Guid id);
+        Task<ResponseBuilder<CompanyResponse?>> RetrieveCompanyByIsin(string isin);
     }
 
     public class RetrieveCompanyApplicationService : IRetrieveCompanyApplicationService
@@ -42,6 +43,25 @@ namespace Company.Api.ApplicationServices
             if (company == null)
             {
                 logger.LogWarning("Company with ID {Id} not found.", id);
+                return new ResponseBuilder<CompanyResponse?>()
+                    .WithError($"Company not found.", HttpStatusCode.NotFound);
+            }
+
+            return new ResponseBuilder<CompanyResponse?>().WithSuccess(company, HttpStatusCode.OK);
+        }
+
+        public async Task<ResponseBuilder<CompanyResponse?>> RetrieveCompanyByIsin(string isin)
+        {
+            if (string.IsNullOrEmpty(isin))
+            {
+                return new ResponseBuilder<CompanyResponse?>()
+                    .WithError("Invalid company ISIN provided.", HttpStatusCode.BadRequest);
+            }
+
+            var company = await retrieveCompanyDomainService.RetrieveCompanybyIsin(isin);
+            if (company == null)
+            {
+                logger.LogWarning("Company with ISIN {Isin} not found.", isin);
                 return new ResponseBuilder<CompanyResponse?>()
                     .WithError($"Company not found.", HttpStatusCode.NotFound);
             }

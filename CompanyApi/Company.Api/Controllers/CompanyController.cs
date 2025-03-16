@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Company.Api.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/company")]
     [ApiController]
     public class CompanyController : ControllerBase
     {
@@ -38,6 +38,16 @@ namespace Company.Api.Controllers
         {
             var responseBuilder = await retrieveCompanyApplicationService.RetrieveCompanyById(id);
             return responseBuilder.Build(this, nameof(RetrieveCompanyById), logger);
+        }
+
+        [HttpGet("isin/{isin}")]
+        [ProducesResponseType(typeof(CompanyResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> RetrieveCompanyByIsin(string isin)
+        {
+            var responseBuilder = await retrieveCompanyApplicationService.RetrieveCompanyByIsin(isin);
+            return responseBuilder.Build(this, nameof(RetrieveCompanyByIsin), logger);
         }
     }
 }
