@@ -1,7 +1,9 @@
 using Company.Api.ApplicationServices;
+using Company.Api.Data;
 using Company.Api.DomainServices;
 using Company.Api.Utils;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
 
@@ -48,6 +50,11 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddScoped<IRetrieveCompanyApplicationService, RetrieveCompanyApplicationService>();
 builder.Services.AddScoped<IRetrieveCompanyDomainService, RetrieveCompanyDomainService>();
 
+
+builder.Services.AddDbContext<CompanyDbContext>(options =>
+{
+    options.UseSqlServer(builder.Configuration.GetConnectionString("CompaniesDbConnection"));
+});
 
 builder.Services.AddProblemDetails(options =>
 {
