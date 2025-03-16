@@ -10,13 +10,16 @@ namespace Company.Api.Controllers
     public class CompanyController : ControllerBase
     {
         private readonly IRetrieveCompanyApplicationService retrieveCompanyApplicationService;
+        private readonly ISaveCompanyApplicationService saveCompanyApplicationService;
         private readonly ILogger<CompanyController> logger;
 
         public CompanyController(
             IRetrieveCompanyApplicationService retrieveCompanyApplicationService,
+            ISaveCompanyApplicationService saveCompanyApplicationService,
             ILogger<CompanyController> logger)
         {
             this.retrieveCompanyApplicationService = retrieveCompanyApplicationService;
+            this.saveCompanyApplicationService = saveCompanyApplicationService;
             this.logger = logger;
         }
 
@@ -48,6 +51,15 @@ namespace Company.Api.Controllers
         {
             var responseBuilder = await retrieveCompanyApplicationService.RetrieveCompanyByIsin(isin);
             return responseBuilder.Build(this, nameof(RetrieveCompanyByIsin), logger);
+        }
+
+        [HttpPost]
+        [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> AddCompany(CompanySubmission company)
+        {
+            var responseBuilder = await saveCompanyApplicationService.CreateCompany(company);
+            return responseBuilder.Build(this, nameof(AddCompany), logger);
         }
     }
 }

@@ -1,4 +1,5 @@
 using Company.Api.ApplicationServices;
+using Company.Api.Commands;
 using Company.Api.Data;
 using Company.Api.DomainServices;
 using Company.Api.Projections;
@@ -54,7 +55,9 @@ builder.Services.AddScoped<IRetrieveCompanyDomainService, RetrieveCompanyDomainS
 builder.Services.AddScoped<ICompanyQuery, CompanyQuery>();
 builder.Services.AddScoped<ICompanyProjection, CompanyProjection>();
 
-
+builder.Services.AddScoped<ISaveCompanyApplicationService, SaveCompanyApplicationService>();
+builder.Services.AddScoped<ICompanyDomainFactory, CompanyDomainFactory>();
+builder.Services.AddScoped<ISaveCompanyCommand, SaveCompanyCommand>();
 
 builder.Services.AddDbContext<CompanyDbContext>(options =>
 {
