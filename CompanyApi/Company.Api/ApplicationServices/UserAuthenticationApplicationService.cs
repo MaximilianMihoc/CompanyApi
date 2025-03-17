@@ -12,6 +12,7 @@ namespace Company.Api.ApplicationServices
     {
         Task<ResponseBuilder<CreatedResponse>> RegisterUser(UserRegistrationSubmission request);
         Task<ResponseBuilder<TokenResponse>> LoginUser(UserLoginSubmission request);
+        Task<ResponseBuilder<TokenResponse>> RefreshToken(RefreshTokenSubmission request);
     }
 
     public class UserAuthenticationApplicationService : IUserAuthenticationApplicationService
@@ -41,15 +42,26 @@ namespace Company.Api.ApplicationServices
                 return new ResponseBuilder<TokenResponse>()
                     .WithError(domainResult.Error, HttpStatusCode.BadRequest);
             }
+            await saveUserCommand.UpdateUserTokens(domainResult.Value);
 
             var token = authenticationTokenDomainService.CreateToken(domainResult.Value);
-            var refreshToken = authenticationTokenDomainService.GenerateRefreshToken();
-
-            var tokenDomain = UserTokenDomain.Create(domainResult.Value.Id, refreshToken, DateTime.UtcNow.AddDays(1));
-            await saveUserCommand.UpdateUserTokens(tokenDomain);
-
             return new ResponseBuilder<TokenResponse>()
-                .WithSuccess(new TokenResponse { AccessToken = token, RefreshToken = refreshToken }, HttpStatusCode.Created);
+                .WithSuccess(new TokenResponse { AccessToken = token, RefreshToken = domainResult.Value.RefreshToken }, HttpStatusCode.Created);
+        }
+
+        public async Task<ResponseBuilder<TokenResponse>> RefreshToken(RefreshTokenSubmission request)
+        {
+            var domainResult = await userLoginDomainFactory.RefreshTokens(request);
+            if (!domainResult.IsSuccess)
+            {
+                return new ResponseBuilder<TokenResponse>()
+                    .WithError(domainResult.Error, HttpStatusCode.Unauthorized);
+            }
+            await saveUserCommand.UpdateUserTokens(domainResult.Value);
+
+            var token = authenticationTokenDomainService.CreateToken(domainResult.Value);
+            return new ResponseBuilder<TokenResponse>()
+                .WithSuccess(new TokenResponse { AccessToken = token, RefreshToken = domainResult.Value.RefreshToken }, HttpStatusCode.Created);
         }
 
         public async Task<ResponseBuilder<CreatedResponse>> RegisterUser(UserRegistrationSubmission request)
@@ -60,7 +72,6 @@ namespace Company.Api.ApplicationServices
                 return new ResponseBuilder<CreatedResponse>()
                     .WithError(domainResult.Error, HttpStatusCode.BadRequest);
             }
-
             await saveUserCommand.CreateUser(domainResult.Value);
 
             return new ResponseBuilder<CreatedResponse>()

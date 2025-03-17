@@ -7,7 +7,7 @@ namespace Company.Api.Commands
     public interface ISaveUserCommand
     {
         Task CreateUser(UserDomain userDomain);
-        Task UpdateUserTokens(UserTokenDomain userDomain);
+        Task UpdateUserTokens(UserWithTokenDomain userDomain);
     }
 
     public class SaveUserCommand : ISaveUserCommand
@@ -35,7 +35,7 @@ namespace Company.Api.Commands
             await dbContext.SaveChangesAsync();
         }
 
-        public async Task UpdateUserTokens(UserTokenDomain userDomain)
+        public async Task UpdateUserTokens(UserWithTokenDomain userDomain)
         {
             var user = new UserEntity
             {

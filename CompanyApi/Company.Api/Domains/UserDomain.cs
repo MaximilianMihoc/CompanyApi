@@ -10,8 +10,6 @@ namespace Company.Api.Domains
         public string Name { get; init; } = string.Empty;
         public string Email { get; init; } = string.Empty;
         public UserRole Role { get; init; } = UserRole.User;
-        public string? RefreshToken { get; init; }
-        public DateTime? RefreshTokenExpiryTime { get; init; }
 
         protected UserDomain(Guid id, string username, string passwordHash, string name, string email, UserRole role)
         {
@@ -29,22 +27,23 @@ namespace Company.Api.Domains
         }
     }
 
-    public class UserTokenDomain
+    public class UserWithTokenDomain : UserDomain
     {
-        public Guid Id { get; init; }
         public string RefreshToken { get; init; }
         public DateTime RefreshTokenExpiryTime { get; init; }
 
-        protected UserTokenDomain(Guid id, string refreshToken, DateTime refreshTokenExpiryTime)
+        protected UserWithTokenDomain(Guid id, string username, string passwordHash, string name, string email, UserRole role,
+            string refreshToken, DateTime refreshTokenExpiryTime) 
+            : base(id, username, passwordHash, name, email, role)
         {
-            Id = id;
             RefreshToken = refreshToken;
             RefreshTokenExpiryTime = refreshTokenExpiryTime;
         }
 
-        public static UserTokenDomain Create(Guid id, string refreshToken, DateTime refreshTokenExpiryTime)
+        public static UserWithTokenDomain Create(Guid id, string username, string passwordHash, string name, string email, UserRole role,
+            string refreshToken, DateTime refreshTokenExpiryTime)
         {
-            return new UserTokenDomain(id, refreshToken, refreshTokenExpiryTime);
+            return new UserWithTokenDomain(id, username, passwordHash, name, email, role, refreshToken, refreshTokenExpiryTime);
         }
     }
 }

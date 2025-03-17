@@ -2,6 +2,7 @@
 using Company.Api.Models;
 using Company.Api.Submissions;
 using Company.Api.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Company.Api.Controllers
@@ -37,6 +38,22 @@ namespace Company.Api.Controllers
         {
             var responseBuilder = await userAuthenticationApplicationService.LoginUser(request);
             return responseBuilder.Build(this, nameof(AddUser), logger);
+        }
+
+        [HttpPost("refresh-token")]
+        [ProducesResponseType(typeof(TokenResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> RefreshToken(RefreshTokenSubmission request)
+        {
+            var responseBuilder = await userAuthenticationApplicationService.RefreshToken(request);
+            return responseBuilder.Build(this, nameof(RefreshToken), logger);
+        }
+
+        [Authorize]
+        [HttpGet("check-authentication")]
+        public IActionResult AuthenticatedOnlyEndpoint()
+        {
+            return Ok("You are authenticated!");
         }
     }
 }
