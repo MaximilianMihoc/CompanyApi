@@ -70,6 +70,9 @@ builder.Services.AddScoped<ISaveUserCommand, SaveUserCommand>();
 builder.Services.AddScoped<IUserLoginDomainFactory, UserLoginDomainFactory>();
 builder.Services.AddScoped<IAuthenticationTokenDomainService, AuthenticationTokenDomainService>();
 
+builder.Services.AddScoped<IExchangeLookupApplicationService, ExchangeLookupApplicationService>();
+builder.Services.AddScoped<IExchangeLookupService, ExchangeLookupService>();
+
 builder.Services.AddDbContext<CompanyDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("CompaniesDbConnection"));
