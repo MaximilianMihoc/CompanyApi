@@ -29,7 +29,7 @@ namespace Company.Api.DomainServices
             var hashedPassword = new PasswordHasher<UserRegistrationSubmission>()
                 .HashPassword(request, request.Password);
 
-            var userDomain = UserDomain.Create(Guid.NewGuid(), request.Username, hashedPassword, request.Name, request.Email, UserRole.User);
+            var userDomain = UserDomain.Create(Guid.NewGuid(), request.Username, hashedPassword, request.Name, request.Email, request.Role ?? UserRole.User);
             return Result<UserDomain>.Success(userDomain);
         }
     }
