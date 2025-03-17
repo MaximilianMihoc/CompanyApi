@@ -5,10 +5,13 @@ using Company.Api.DomainServices;
 using Company.Api.Projections;
 using Company.Api.Queries;
 using Company.Api.Utils;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Scalar.AspNetCore;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +62,14 @@ builder.Services.AddScoped<ISaveCompanyApplicationService, SaveCompanyApplicatio
 builder.Services.AddScoped<ICompanyDomainFactory, CompanyDomainFactory>();
 builder.Services.AddScoped<ISaveCompanyCommand, SaveCompanyCommand>();
 
+builder.Services.AddScoped<IUserAuthenticationApplicationService, UserAuthenticationApplicationService>();
+builder.Services.AddScoped<IUserRegistrationDomainFactory, UserRegistrationDomainFactory>();
+builder.Services.AddScoped<IRetrieveUserDomainService, RetrieveUserDomainService>();
+builder.Services.AddScoped<ISaveUserCommand, SaveUserCommand>();
+
+builder.Services.AddScoped<IUserLoginDomainFactory, UserLoginDomainFactory>();
+builder.Services.AddScoped<IAuthenticationTokenDomainService, AuthenticationTokenDomainService>();
+
 builder.Services.AddDbContext<CompanyDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("CompaniesDbConnection"));
@@ -74,6 +85,23 @@ builder.Services.AddProblemDetails(options =>
         context.ProblemDetails.Extensions.TryAdd("traceId", activity?.Id);
     };
 });
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["AppSettings:Issuer"],
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["AppSettings:Audience"],
+            ValidateLifetime = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["AppSettings:Token"]!)),
+            ValidateIssuerSigningKey = true
+        };
+    });
 
 var app = builder.Build();
 

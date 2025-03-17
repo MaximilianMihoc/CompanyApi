@@ -1,6 +1,7 @@
 ﻿using Company.Api.ApplicationServices;
 using Company.Api.Models;
 using Company.Api.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Company.Api.Controllers
@@ -24,6 +25,7 @@ namespace Company.Api.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         [ProducesResponseType(typeof(List<CompanyResponse>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
@@ -34,6 +36,7 @@ namespace Company.Api.Controllers
         }
 
         [HttpGet("{id}")]
+        [Authorize]
         [ProducesResponseType(typeof(CompanyResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
@@ -44,6 +47,7 @@ namespace Company.Api.Controllers
         }
 
         [HttpGet("isin/{isin}")]
+        [Authorize]
         [ProducesResponseType(typeof(CompanyResponse), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
@@ -54,6 +58,7 @@ namespace Company.Api.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ProducesResponseType(typeof(CreatedResponse), StatusCodes.Status201Created)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> AddCompany(CompanySubmission company)
@@ -63,6 +68,7 @@ namespace Company.Api.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> UpdateCompany(Guid id, CompanySubmission company)

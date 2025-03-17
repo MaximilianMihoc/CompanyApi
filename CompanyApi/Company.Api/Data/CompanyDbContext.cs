@@ -7,5 +7,6 @@ namespace Company.Api.Data
     {
         public DbSet<CompanyEntity> Companies => Set<CompanyEntity>();
         public DbSet<ExchangeEntity> Exchanges => Set<ExchangeEntity>();
+        public DbSet<UserEntity> Users => Set<UserEntity>();
     }
 }
